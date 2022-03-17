@@ -7,12 +7,14 @@ class SvgButton extends StatefulWidget {
     required this.assets,
     this.defaultColor = Colors.black,
     this.hoverColor = Colors.orange,
+    this.clickColor = Colors.red,
     this.onClick,
   }) : super(key: key);
 
   final String assets;
   final Color defaultColor;
   final Color hoverColor;
+  final Color clickColor;
   final Function()? onClick;
 
   @override
@@ -20,31 +22,35 @@ class SvgButton extends StatefulWidget {
 }
 
 class _SvgButtonState extends State<SvgButton> {
-  late Color currentColor = widget.defaultColor;
+  bool _hover = false;
+  set hover(bool v) {
+    setState(() {
+      _hover = v;
+    });
+  }
 
-  void setDefaultColor() => setState(() {
-        currentColor = widget.defaultColor;
-      });
-
-  void setHoverColor() => setState(() {
-        currentColor = widget.hoverColor;
-      });
+  bool _click = false;
+  set click(bool v) {
+    setState(() {
+      _click = v;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (d) => setHoverColor(),
-      onExit: (d) => setDefaultColor(),
+      onEnter: (d) => hover = true,
+      onExit: (d) => hover = false,
       child: GestureDetector(
-        onTapDown: (d) => setHoverColor(),
+        onTapDown: (d) => click = true,
         onTapUp: (d) {
-          setDefaultColor();
+          click = false;
           widget.onClick?.call();
         },
-        onTapCancel: setDefaultColor,
+        onTapCancel: () => click = false,
         child: SvgPicture.asset(
           widget.assets,
-          color: currentColor,
+          color: _click ? widget.clickColor : (_hover ? widget.hoverColor : widget.defaultColor),
         ),
       ),
     );
